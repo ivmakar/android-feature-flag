@@ -1,5 +1,8 @@
 # android-feature-flag
 
+[![CI](https://github.com/ivmakar/android-feature-flag/actions/workflows/ci.yml/badge.svg)](https://github.com/ivmakar/android-feature-flag/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 A small, typed, multi-source **feature-flag resolver** for Android.
 
 It layers several flag sources by priority — business defaults, build-variant overrides, persisted QA overrides, and a forced kill-switch — and exposes one value through a synchronous `get()` and a reactive `observe()`. The core is storage-agnostic and has no dependency on your app; flag declarations and persistence wiring live on your side.

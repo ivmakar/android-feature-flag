@@ -1,0 +1,32 @@
+name: Bug report
+description: Report incorrect behavior in the library
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Library version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs. actual
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Smallest code/flag setup that triggers the issue. Note the resolved source and priority if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: minSdk/compileSdk, build type (debug/release), Hilt or manual wiring.
+    validations:
+      required: false

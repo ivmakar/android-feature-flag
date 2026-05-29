@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an improvement or new capability
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that the library makes hard or impossible?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: API sketch or behavior you'd expect. A new Feature subtype must round-trip through FeatureCodec — note that if relevant.
+    validations:
+      required: false
+  - type: checkboxes
+    id: agnostic
+    attributes:
+      label: Confirm
+      options:
+        - label: This stays app-agnostic (no dependency on a specific app/vendor).
+          required: true
