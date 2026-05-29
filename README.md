@@ -122,6 +122,41 @@ Copy the `feature-flags/` directory into your project (e.g. `your-app/feature-fl
 
 ---
 
+## Integrate with a coding agent
+
+If you develop with an AI coding agent (Claude Code, Cursor, Copilot, etc.), copy the prompt below and hand it to your agent. It performs the whole integration on its own — adds the library, wires the build, declares a starter flag, and verifies the build.
+
+````text
+Integrate the `android-feature-flag` library into THIS project, end to end.
+
+Source of truth: https://github.com/ivmakar/android-feature-flag
+First read `libs/android-feature-flag/README.md` for the exact API before wiring anything.
+
+Steps:
+1. Add the library as a git submodule, pinned to the latest release tag, and wire it as a composite build:
+   - `git submodule add https://github.com/ivmakar/android-feature-flag.git libs/android-feature-flag`
+   - In the root `settings.gradle.kts` add: `includeBuild("libs/android-feature-flag")`
+   - Ensure the root `gradle.properties` contains: `android.experimental.enableTestFixturesKotlinSupport=true`
+2. In the module that should own feature flags, add dependencies:
+   - `implementation("io.github.ivmakar:feature-flags:0.1.0")`
+   - `testImplementation(testFixtures("io.github.ivmakar:feature-flags:0.1.0"))`
+3. Declare one starter flag as a Kotlin `object` extending `BoolFeature` (a stable `key` + a `default`).
+4. Detect how this project does dependency injection and wire the resolver accordingly:
+   - If Hilt is present: create a Hilt module that provides `@IsDebug` (= `BuildConfig.DEBUG`), a `BusinessFeatureConfig`, a debug-only `DebugFeatureConfig`, and a `ForcedFeatureConfig`.
+   - Otherwise: build it by hand with `FeatureFlagsConfigurator`, passing `isDebug = BuildConfig.DEBUG`, a `business` config, and an `overrideSource` that is non-null ONLY in debug.
+5. Demonstrate one real call site: replace an existing hardcoded boolean toggle with `featureFlags.get(<Flag>)`, or add a clearly-marked example call if none exists.
+6. Build the consuming module and run its unit tests; fix the wiring until they pass.
+
+Hard constraints:
+- `BuildVariantSource` and `PersistentOverrideSource` are DEBUG-ONLY. Never let a debug default or a persisted override reach a release build.
+- Keep flags typed — declare typed `Feature` objects, never raw string keys.
+- Do not modify anything inside `libs/android-feature-flag/`; treat it as a read-only dependency.
+````
+
+> Replace `0.1.0` with the latest release tag, and pin the submodule to that tag.
+
+---
+
 ## Usage
 
 ### 1. Declare your flags
