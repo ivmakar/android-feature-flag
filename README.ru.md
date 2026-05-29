@@ -124,36 +124,17 @@ dependencies {
 
 ## Подключение через AI-агента
 
-Если вы разрабатываете с AI-агентом (Claude Code, Cursor, Copilot и т.д.), скопируйте промпт ниже и передайте его агенту. Он выполнит всю интеграцию сам — добавит библиотеку, настроит сборку, объявит стартовый флаг и проверит сборку.
+Если вы разрабатываете с AI-агентом (Claude Code, Cursor, Copilot и т.д.), скопируйте промпт ниже и передайте его агенту — он сам скопирует модуль в проект и всё подключит.
 
 ````text
-Интегрируй библиотеку `android-feature-flag` в ЭТОТ проект, от начала до конца.
-
-Источник истины: https://github.com/ivmakar/android-feature-flag
-Сначала прочитай `libs/android-feature-flag/README.md` и узнай точный API, прежде чем что-либо подключать.
-
-Шаги:
-1. Добавь библиотеку как git-сабмодуль, зафиксированный на последнем release-теге, и подключи composite build:
-   - `git submodule add https://github.com/ivmakar/android-feature-flag.git libs/android-feature-flag`
-   - В корневой `settings.gradle.kts` добавь: `includeBuild("libs/android-feature-flag")`
-   - Убедись, что в корневом `gradle.properties` есть: `android.experimental.enableTestFixturesKotlinSupport=true`
-2. В модуле, который должен владеть фичефлагами, добавь зависимости:
-   - `implementation("io.github.ivmakar:feature-flags:0.1.0")`
-   - `testImplementation(testFixtures("io.github.ivmakar:feature-flags:0.1.0"))`
-3. Объяви один стартовый флаг как Kotlin `object`, наследующий `BoolFeature` (стабильный `key` + `default`).
-4. Определи, как в проекте сделан DI, и подключи резолвер соответственно:
-   - Если есть Hilt: создай Hilt-модуль, предоставляющий `@IsDebug` (= `BuildConfig.DEBUG`), `BusinessFeatureConfig`, debug-only `DebugFeatureConfig` и `ForcedFeatureConfig`.
-   - Иначе: собери вручную через `FeatureFlagsConfigurator`, передав `isDebug = BuildConfig.DEBUG`, конфиг `business` и `overrideSource`, который не-null ТОЛЬКО в debug.
-5. Покажи одно реальное место вызова: замени существующий захардкоженный boolean-тумблер на `featureFlags.get(<Flag>)`, либо добавь явно помеченный пример вызова, если такого нет.
-6. Собери потребляющий модуль и прогони его юнит-тесты; чини привязку, пока они не пройдут.
-
-Жёсткие ограничения:
-- `BuildVariantSource` и `PersistentOverrideSource` — ТОЛЬКО для debug. Никогда не позволяй debug-дефолту или сохранённому оверрайду попасть в release-сборку.
-- Держи флаги типизированными — объявляй типизированные `Feature`-объекты, никаких сырых строковых ключей.
-- Ничего не меняй внутри `libs/android-feature-flag/`; считай это read-only зависимостью.
+Интегрируй `android-feature-flag` в ЭТОТ проект как локальный Gradle-модуль (скопируй код, без сабмодуля). Референс API: https://github.com/ivmakar/android-feature-flag
+1. Скопируй каталог `feature-flags/` из этого репозитория в корень проекта.
+2. В `settings.gradle.kts` добавь `include(":feature-flags")`; в `gradle.properties` добавь `android.experimental.enableTestFixturesKotlinSupport=true`.
+3. В модуле, который владеет флагами, добавь: `implementation(project(":feature-flags"))` и `testImplementation(testFixtures(project(":feature-flags")))`.
+4. Объяви типизированный флаг (`object FavoritesEnabled : BoolFeature("favorites_enabled", default = false)`).
+5. Подключи `FeatureFlags`: Hilt-модуль, если есть Hilt, иначе вручную `FeatureFlagsConfigurator(isDebug = BuildConfig.DEBUG, ...)`. Передавай `overrideSource` не-null ТОЛЬКО в debug — `BuildVariantSource`/`PersistentOverrideSource` только для debug и не должны попадать в release.
+6. Собери модуль и прогони его юнит-тесты; чини привязку, пока не пройдут.
 ````
-
-> Замени `0.1.0` на последний release-тег и зафиксируй сабмодуль на этом теге.
 
 ---
 
